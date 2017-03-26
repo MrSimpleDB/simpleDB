@@ -10,7 +10,6 @@ import simpledb.file.*;
 class BasicBufferMgr {
 	private Buffer[] bufferpool;
 	private int numAvailable;
-	private int lastReplacedPageIndex;
 
 	/**
 	 * Creates a buffer manager having the specified number 

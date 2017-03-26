@@ -74,6 +74,7 @@ public class RecordFile {
 	 * @return the integer value at that field
 	 */
 	public int getInt(String fldname) {
+		updateWrittenRecordStats();
 		return rp.getInt(fldname);
 	}
 
@@ -84,6 +85,7 @@ public class RecordFile {
 	 * @return the string value at that field
 	 */
 	public String getString(String fldname) {
+		updateWrittenRecordStats();
 		return rp.getString(fldname);
 	}
 
@@ -95,6 +97,7 @@ public class RecordFile {
 	 */
 	public void setInt(String fldname, int val) {
 		rp.setInt(fldname, val);
+		updateReadRecordStats();
 	}
 
 	/**
@@ -105,6 +108,7 @@ public class RecordFile {
 	 */
 	public void setString(String fldname, String val) {
 		rp.setString(fldname, val);
+		updateReadRecordStats();
 	}
 
 	/**
@@ -126,8 +130,10 @@ public class RecordFile {
 	 */
 	public void insert() {
 		while (!rp.insert()) {
-			if (atLastBlock())
+			if (atLastBlock()){
 				appendBlock();
+				updateRID();
+			}
 			moveTo(currentblknum + 1);
 		}
 	}
@@ -168,6 +174,10 @@ public class RecordFile {
 		tx.append(filename, fmtr);
 	}
 	
+	//
+	//UPDATE
+	//
+	
 	public Map<RID, BasicRecordStats> getStatsRecord() {
 		return statsRecord;
 	}
@@ -185,7 +195,7 @@ public class RecordFile {
 	}
 
 	public RID getLastWrittenRecord() {
-		return lastWrittenRecord;
+		return this.lastWrittenRecord;
 	}
 
 	public void setLastWrittenRecord(RID lastWrittenRecord) {
@@ -195,4 +205,46 @@ public class RecordFile {
 	public void resetLastReadRecord(){this.lastReadRecord=null;}
 	public void resetLastWrittenRecord(){this.lastWrittenRecord=null;}
 	public void resetStatsRecord(){this.statsRecord.clear();}
+	
+	private void updateRID() {
+		getStatsRecord().put(currentRid(), new BasicRecordStats());
+		setLastReadRecord(currentRid());
+		setLastWrittenRecord(currentRid());
+	}
+	
+	private void updateReadRecordStats() {
+		if (currentRid()!=getLastReadRecord()) this.statsRecord.get(currentRid()).incrementReadRecord();
+		this.statsRecord.get(currentRid()).incrementReadFieldsRecord();
+		setLastReadRecord(currentRid());
+	}
+	
+	private void updateWrittenRecordStats() {
+		if (currentRid()!=getLastWrittenRecord()) this.statsRecord.get(currentRid()).incrementWrittenRecord();
+		this.statsRecord.get(currentRid()).incrementWrittenFieldsRecord();
+		setLastWrittenRecord(currentRid());
+	}
+	
+	public int getAllReadRecord(){
+		int allReadRecord=0;
+		for (RID rid:getStatsRecord().keySet()) allReadRecord+=getStatsRecord().get(rid).getReadRecord();
+		return allReadRecord;
+	}
+	
+	public int getAllWrittenRecord(){
+		int allReadRecord=0;
+		for (RID rid:getStatsRecord().keySet()) allReadRecord+=getStatsRecord().get(rid).getReadRecord();
+		return allReadRecord;
+	}
+	
+	public int getAllReadFieldsRecord(){
+		int allReadRecord=0;
+		for (RID rid:getStatsRecord().keySet()) allReadRecord+=getStatsRecord().get(rid).getReadRecord();
+		return allReadRecord;
+	}
+	
+	public int getAllWrittenFieldsRecord(){
+		int allReadRecord=0;
+		for (RID rid:getStatsRecord().keySet()) allReadRecord+=getStatsRecord().get(rid).getReadRecord();
+		return allReadRecord;
+	}
 }
