@@ -38,6 +38,7 @@ public class RID {
 	}
 
 	public boolean equals(Object obj) {
+		if (obj==null) return false;
 		RID r = (RID) obj;
 		return blknum == r.blknum && id==r.id;
 	}
@@ -47,6 +48,6 @@ public class RID {
 	}
 	
 	public int hashCode(){
-		return this.id;
+		return toString().hashCode();
 	}
 }

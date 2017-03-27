@@ -22,22 +22,49 @@ public class RecordTestClass {
 		RecordFile rf= new RecordFile(ti, tx);
 		
 		//insert 10000 records
-		for (int i=0;i<100;i++){
-			insert(rf);
-		}
-		
+		for (int i=0;i<10000;i++) insert(rf);
 		String event="Insert 10000 records";
 		printAllRecordStats(event,rf);
+		rf.resetAllStatsRecords();
 		
 		//read all records
 		rf.beforeFirst();
 		while(rf.next())read(rf);
-		
 		event="Read all records";
 		printAllRecordStats(event,rf);
+		rf.resetAllStatsRecords();
 		
 		//delete 50% of records
-		delete(rf);
+		rf.beforeFirst();
+		int j=0;
+		while(rf.next()&&j<5000){
+			delete(rf);
+			j++;
+		}
+		event="Delete 5000 records";
+		printAllRecordStats(event,rf);
+		rf.resetAllStatsRecords();
+		
+		//read all records
+		rf.beforeFirst();
+		while(rf.next())read(rf);
+		event="Read all records";
+		printAllRecordStats(event,rf);
+		rf.resetAllStatsRecords();
+		
+		//insert 7000 records
+		for (int i=0;i<7000;i++) insert(rf);
+		event="Insert 7000 records";
+		printAllRecordStats(event,rf);
+		rf.resetAllStatsRecords();
+		
+		//read all records
+		rf.beforeFirst();
+		while(rf.next())read(rf);
+		event="Read all records";
+		printAllRecordStats(event,rf);
+		rf.resetAllStatsRecords();
+		
 	}
 
 	private int randomNumberGenerator(){
@@ -56,14 +83,15 @@ public class RecordTestClass {
 		rf.setString("code", cod);
 	}
 
-	private void delete(RecordFile rf){}
+	private void delete(RecordFile rf){rf.delete();}
 
 	private void read(RecordFile rf){
 		rf.getInt("number");
 		rf.getString("code");
+		//System.out.println(rf.getInt("number")+" "+rf.getString("code"));
 	}
 	
-	private void printAllRecordStats(String event,RecordFile rf){
+	public void printAllRecordStats(String event,RecordFile rf){
 		System.out.println(event+": "+rf.getAllReadRecord()+" readRecord "+rf.getAllWrittenRecord()+" writtenRecord "+
 	rf.getAllReadFieldsRecord()+" readFieldsRecord "+rf.getAllWrittenFieldsRecord()+" writtenFieldsRecord");
 	}
